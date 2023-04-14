@@ -1,15 +1,11 @@
-# pip install cvat-sdk -U
-from get_data_info import get_task_info, get_project_info
+from get_data_info import get_project_info
 from flask import Flask, request
-from send_msg import wb_dingtalk
+from send_msg import dingtalk
 from loguru import logger
 import hashlib
 import config
 import json
 import hmac
-
-# wb_dingtalk(json.dumps(data, indent=2))
-
 
 app = Flask(__name__)
 
@@ -23,10 +19,11 @@ def webhook():
     if hmac.compare_digest(request.headers["X-Signature-256"], signature):
         logger.info(request.data)
         data = json.loads(request.data, encoding="utf-8")
-        eventList = ["ping", "update:project", "create:job", "update:job", "delete:task", "create:issue", "create:comment", "delete:issue", "update:issue"]
+        eventList = config.EVENT_LIST
         if data["event"] == eventList[0]: # 测试 webhook 是否畅通
             username = data['sender']["username"]
-            logger.info(f"@{username} ping webhook successful !")
+            dingtalk(eventList[0], f"@{username} ping cvat webhook successful !")
+            logger.info(f"@{username} ping cvat webhook successful !")
             
         if data["event"] == eventList[1]: # 更新项目名字/标签
             pass
@@ -37,15 +34,38 @@ def webhook():
             taskProId = data["task"]["project_id"] # 项目ID
             create_task_owner = data["task"]["owner"]["username"] # 创建人
             taskdimension = data["task"]["dimension"] # 任务类型：2D 、3D
-            webhookSend = data["sender"]["username"] # webhook 触发者
-            # 这里需要获取 该任务的 总帧数 和 所在的项目名字是哪个
-            task_keyframe_count = get_task_info(taskId)
-            task_in_project_name = get_project_info(taskProId)
+
+            ding_data = {
+                "createTaskTime": createTaskTime,
+                "taskName": taskName,
+                "taskId": taskId,
+                "create_task_owner": create_task_owner,
+                "taskdimension": taskdimension,
+                "task_in_project_name": get_project_info(taskProId)
+            }
+
+            dingtalk(eventList[2], ding_data)
             
         if data["event"] == eventList[3]: # 更新标注任务状态
             pass
         if data["event"] == eventList[4]: # 删除标注任务
-            pass
+            del_task_owner = data["task"]["owner"]["username"]
+            del_task_status = data["task"]["status"]
+            del_task_id = data["task"]["id"]
+            del_task_name = data["task"]["name"]
+            del_task_ProName = get_project_info(data["task"]["project_id"])
+            del_task_dimension = data["task"]["dimension"]
+            ding_data = {
+                "del_task_owner": del_task_owner,
+                "del_task_status": del_task_status,
+                "del_task_id": del_task_id,
+                "del_task_name": del_task_name,
+                "del_task_ProName": del_task_ProName,
+                "del_task_dimension": del_task_dimension,
+            }
+
+            dingtalk(eventList[4], ding_data)
+
         if data["event"] == eventList[5]: # 创建批注
             pass
         if data["event"] == eventList[6]: # 批注回复
@@ -57,7 +77,7 @@ def webhook():
         
         return app.response_class(status=200)
     else:
-        wb_dingtalk("error", "")
+        dingtalk("error", "")
         return app.response_class(status=404)
 
 
@@ -66,62 +86,6 @@ def webhook():
 app.run(host=config.APP_HOST,port=config.APP_PORT, debug=config.APP_DEBUG)
 
 '''
-create:task
-    '{
-        "event": "create:task", 
-        "task": {
-            "url": "http://10.4.10.254:8080/api/tasks/2013", 
-            "id": 2013, 
-            "name": "testg", 
-            "project_id": 73, 
-            "mode": "", 
-            "owner": {
-                "url": "http://10.4.10.254:8080/api/users/1", 
-                "id": 1, 
-                "username": "guoweitao", 
-                "first_name": "guo", "
-                last_name": "weitao"
-            }, 
-            "assignee": null, 
-            "bug_tracker": "", 
-            "created_date": "2023-04-14T07:05:47.803730Z", 
-            "updated_date": "2023-04-14T07:05:47.830569Z", 
-            "overlap": null, 
-            "segment_size": 0, 
-            "status": "annotation", 
-            "dimension": "2d", 
-            "subset": "", 
-            "organization": null, 
-            "target_storage": {
-                "id": 100,
-                "location": "local", 
-                "cloud_storage_id": null
-            }, 
-            "source_storage": {
-                "id": 99, 
-                "location": "local", 
-                "cloud_storage_id": null
-            }, 
-            "jobs": {
-                "count": 0, 
-                "completed": 0, 
-                "url": "http://10.4.10.254:8080/api/jobs?task_id=2013"
-            }, 
-            "labels": {
-                "count": 4, 
-                "url": "http://10.4.10.254:8080/api/labels?task_id=2013"
-            }
-        }, 
-        "webhook_id": 3, 
-        "sender": {
-            "url": "http://10.4.10.254:8080/api/users/1", 
-            "id": 1, 
-            "username": "guoweitao", 
-            "first_name": "guo", 
-            "last_name": "weitao"
-        }
-    }'
-
 update:job
     '{
         "event": "update:job", 
@@ -136,40 +100,6 @@ update:job
         "webhook_id": 3, 
         "sender": {"url": "http://10.4.10.254:8080/api/users/1", "id": 1, "username": "guoweitao", "first_name": "guo", "last_name": "weitao"}
     }'
-
-delete:task
-    '{
-        "event": "delete:task",
-        "task": {
-            "url": "http://10.4.10.254:8080/api/tasks/2010",
-            "id": 2010, "name": "test", "project_id": 73, "mode": "annotation", 
-            "owner": {
-                "url": "http://10.4.10.254:8080/api/users/1",
-                "id": 1, "username": "guoweitao", "first_name": "guo", "last_name": "weitao"
-            }, 
-            "assignee": null, "bug_tracker": "", "created_date": "2023-04-14T03:37:30.488294Z",
-            "updated_date": "2023-04-14T03:51:52.640062Z", "overlap": 0, "segment_size": 1,
-            "status": "validation", "data_chunk_size": 32,
-            "data_compressed_chunk_type": "imageset", 
-            "data_original_chunk_type": "imageset", "size": 1, "image_quality": 70, 
-            "data": 1973, "dimension": "2d", "subset": "", "organization": null, 
-            "target_storage": {
-                "id": 92, "location": "local", "cloud_storage_id": null
-            }, 
-            "source_storage": {
-                "id": 91, "location": "local", "cloud_storage_id": null
-            },
-            "jobs": {
-                "count": 1, "completed": 0, "url": "http://10.4.10.254:8080/api/jobs?task_id=2010"
-            }, 
-            "labels": {
-                "count": 4, "url": "http://10.4.10.254:8080/api/labels?task_id=2010"
-            }
-        },
-        "webhook_id": 3, 
-        "sender": {"url": "http://10.4.10.254:8080/api/users/1", "id": 1, "username": "guoweitao", "first_name": "guo", "last_name": "weitao"}
-    }'
-
 
 update:project
     '{
