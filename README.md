@@ -5,10 +5,7 @@
 # 环境
     cvat server: 2.4.1
     python >= 3.8
-    pip install flask -U
-    pip install requests -U
-    pip install dingtalkchatbot -U
-    pip install loguru -U
+    pip install -r requirements.txt
 # 说明
 - 入口文件: `main.py`
 

@@ -2,10 +2,9 @@ from get_data_info import get_project_info
 from flask import Flask, request
 from send_msg import dingtalk
 from loguru import logger
-import hashlib
+import hashlib, hmac
 import config
-import json
-import hmac
+import datetime, json
 
 app = Flask(__name__)
 
@@ -22,18 +21,18 @@ def webhook():
         eventList = config.EVENT_LIST
         if data["event"] == eventList[0]: # 测试 webhook 是否畅通
             username = data['sender']["username"]
-            dingtalk(eventList[0], f"@{username} ping cvat webhook successful !")
+            # dingtalk(eventList[0], f"@{username} ping cvat webhook successful !")
             logger.info(f"@{username} ping cvat webhook successful !")
             
         if data["event"] == eventList[1]: # 更新项目名字/标签
             pass
         if data["event"] == eventList[2]: # 创建标注任务
-            createTaskTime = data["task"]["created_date"]
-            taskName = data["task"]["name"] # 任务名字
-            taskId = data["task"]["id"] # 任务ID
-            taskProId = data["task"]["project_id"] # 项目ID
-            create_task_owner = data["task"]["owner"]["username"] # 创建人
-            taskdimension = data["task"]["dimension"] # 任务类型：2D 、3D
+            createTaskTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            taskName = data["task"]["name"]
+            taskId = data["task"]["id"]
+            taskProId = data["task"]["project_id"]
+            create_task_owner = data["task"]["owner"]["username"]
+            taskdimension = data["task"]["dimension"]
 
             ding_data = {
                 "createTaskTime": createTaskTime,
@@ -49,6 +48,7 @@ def webhook():
         if data["event"] == eventList[3]: # 更新标注任务状态
             pass
         if data["event"] == eventList[4]: # 删除标注任务
+            del_task_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             del_task_owner = data["task"]["owner"]["username"]
             del_task_status = data["task"]["status"]
             del_task_id = data["task"]["id"]
@@ -56,6 +56,7 @@ def webhook():
             del_task_ProName = get_project_info(data["task"]["project_id"])
             del_task_dimension = data["task"]["dimension"]
             ding_data = {
+                "del_task_time": del_task_time,
                 "del_task_owner": del_task_owner,
                 "del_task_status": del_task_status,
                 "del_task_id": del_task_id,
@@ -77,7 +78,8 @@ def webhook():
         
         return app.response_class(status=200)
     else:
-        dingtalk("error", "")
+        # dingtalk("error", "")
+        logger.error("配置出错")
         return app.response_class(status=404)
 
 
