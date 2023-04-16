@@ -30,5 +30,5 @@ def create_msg(flag, data):
     if flag == eventList[8]:
         msg = f"### <font color={random_color()}>{data['datetime']}</font>\n\r<font color={random_color()}>@{data['issue_upd_owner']}</font>更新了一条由 <font color={random_color()}>{data['issue_create_owner']}</font> 创建的批注的状态, 详情如下:\n\r&emsp;批注ID: <font color={random_color()}>{data['issue_id']}</font>\n\r&emsp;批注所在帧: <font color={random_color()}>{data['issue_frame']}</font>\n\r&emsp;批注状态: <font color={random_color()}>{data['issue_resolved']}</font>\n\r&emsp;任务ID: <font color={random_color()}>{data['issue_task_id']}</font>\n\r&emsp;任务名字: <font color={random_color()}>{data['issue_task_name']}</font>\n\r&emsp;<font color={random_color()}>[内网查看请点我]({data['project_inside_open_addres']})</font>\n\r&emsp;<font color={random_color()}>[外网查看请点我]({data['project_outer_open_addres']})</font>"
     if flag == "error":
-        msg = f"### <font color={random_color()}>{data['datetime']}</font>\n\r<font color={random_color()}>@{data['user']}</font>"
+        msg = f"### <font color={random_color()}>{data['datetime']}</font>\n\r<font color={random_color()}>@{data['msg']}</font>"
     send_msg(msg)
