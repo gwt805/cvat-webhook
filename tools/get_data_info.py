@@ -13,12 +13,12 @@ def get_task_info(task_id):
     return task_name
 
 def get_job_info(job_id):
-    job_info = cvat.get(f"{base_url}/api/tasks/{job_id}").json()
-    task_id = job_info["name"]
+    job_info = cvat.get(f"{base_url}/api/jobs/{job_id}").json()
+    task_id = job_info["task_id"]
     return task_id
 
 def get_issue_info(issue_id):
-    issue_info = cvat.get(f"{base_url}/api/tasks/{issue_id}").json()
+    issue_info = cvat.get(f"{base_url}/api/issues/{issue_id}").json()
     frame = issue_info["frame"]
     job_id = issue_info["job"]
     return job_id, frame

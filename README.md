@@ -4,7 +4,7 @@
 
 # 环境
     cvat server: 2.4.1
-    python >= 3.8
+    python >= 3.9
     pip install -r requirements.txt
 # 说明
 - 入口文件: `main.py`

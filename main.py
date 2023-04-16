@@ -18,7 +18,7 @@ def webhook():
 
     if hmac.compare_digest(request.headers["X-Signature-256"], signature):
         # logger.info(request.data)
-        info = json.loads(request.data, encoding="utf-8")
+        info = json.loads(request.data)
         eventList = config.EVENT_LIST
         
         if info["event"] == eventList[0]: # "ping"
@@ -89,7 +89,7 @@ def webhook():
             task_del_project_id = info["task"]["project_id"] # 在哪个项目中删除的该任务
             task_del_dimension = info["task"]["dimension"] # 被删除的任务类型
             task_touch_owner = info["task"]["owner"]["username"] # 谁创建的该任务
-            task_del_owner = info["task"]["sender"]["username"] # 谁删除的该任务
+            task_del_owner = info["sender"]["username"] # 谁删除的该任务
             task_project_name = get_project_info(task_del_project_id) # 这里根据 project_id 获取 该任务所在项目的名字
             
             data = {
@@ -138,7 +138,7 @@ def webhook():
             }
             create_msg(eventList[5], data)
         if info["event"] == eventList[6]: # "create:comment"
-            comment_issue_id = info["comment"]["id"] # 批注ID
+            comment_issue_id = info["comment"]["issue"] # 批注ID
             comment_message = info["comment"]["message"] # 批语
             comment_create_owner = info["comment"]["owner"]["username"] # 谁创建的批注
             job_id, frame = get_issue_info(comment_issue_id)# 这里根据 comment_issue_id 获取 job_id 和 frame
@@ -178,7 +178,7 @@ def webhook():
                 }
                 create_msg(eventList[7], data)
         if info["event"] == eventList[8]: # "update:issue"
-            resolved_to_str = {'true': '已解决', 'false': '未解决'}
+            resolved_to_str = {'True': '已解决', 'False': '未解决'}
             issue_id = info["issue"]["id"]
             issue_frame = info["issue"]["frame"] # 第几帧上的批注
             issue_job_id = info["issue"]["job"] # 批注所在的job
@@ -200,6 +200,7 @@ def webhook():
                 "project_inside_open_addres": config.BASE_URL + f'/tasks/{issue_task_id}/jobs/{issue_job_id}?frame={issue_frame}',
                 "project_outer_open_addres": config.OUTER_NET_ADDRESS + f'/tasks/{issue_task_id}/jobs/{issue_job_id}?frame={issue_frame}'
             }
+            create_msg(eventList[8], data)
 
         return app.response_class(status=200)
     else:
