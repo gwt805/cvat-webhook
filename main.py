@@ -212,6 +212,5 @@ def webhook():
         logger.error("webhook 配置错误!")
         return app.response_class(status=404)
 
-
 if __name__=="__main__":
     app.run(host=config.APP_HOST,port=config.APP_PORT, debug=config.APP_DEBUG)

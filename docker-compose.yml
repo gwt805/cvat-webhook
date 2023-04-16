@@ -1,0 +1,8 @@
+version: '3'  
+services:  
+  flask_app:  
+    build: .
+    command: python main.py
+    ports:  
+      - "8050:8050"
+    container_name: cvat_webhook_flask
