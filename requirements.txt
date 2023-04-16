@@ -1,5 +1,5 @@
 -i https://pypi.tuna.tsinghua.edu.cn/simple
-flask -U
-requests -U
-dingtalkchatbot -U
-loguru -U
+flask>=2.x
+requests
+dingtalkchatbot
+loguru

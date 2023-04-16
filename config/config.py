@@ -1,0 +1,9 @@
+APP_HOST = "0.0.0.0"
+APP_PORT = 8050
+APP_DEBUG = True
+BASE_URL = ""
+OUTER_NET_ADDRESS = ""
+EVENT_LIST = ["ping", "update:project", "delete:project", "create:job", "delete:task", "update:job", "create:comment", "delete:issue", "update:issue"]
+DING_ROBOT_WEBHOOK_TOKEN = ""
+DING_ROBOT_SECRET = ""
+WECOM_ROBOT_WEBHOOK_KEY = ""

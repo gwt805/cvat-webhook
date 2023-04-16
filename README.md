@@ -9,10 +9,9 @@
 # 说明
 - 入口文件: `main.py`
 
-- 配置文件: `config.py`
-
-- 根据task_id/project_id 获取具体信息文件: `get_data_info.py`
+- 配置文件: `config/config.py`
 
 - 根据cvat webhook 中 `event` 分类然后手动解析字段并转发
+    - [点我查看具体字段信息](./docs/field_info.md)
 
 - 如有其他问题请联系我, Q : `1973735972`
