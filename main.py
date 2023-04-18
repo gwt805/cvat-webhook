@@ -1,10 +1,12 @@
 from tools.get_data_info import get_project_info, get_task_info, get_issue_info, get_job_info
 from tools.message.create_msg import create_msg
 from flask import Flask, request
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+import hashlib, hmac, json
 from config import config
 from loguru import logger
-import datetime, json
-import hashlib, hmac
 
 app = Flask(__name__)
 
@@ -14,7 +16,11 @@ def webhook():
         "sha256="
         + hmac.new("mykey".encode("utf-8"), request.data, digestmod=hashlib.sha256).hexdigest()
     )
-    datetime_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    SHA_TZ = timezone(timedelta(hours=8), name='Asia/Shanghai')
+    utc_now = datetime.utcnow().replace(tzinfo=timezone.utc) # 协调世界时
+    beijing_now = utc_now.astimezone(SHA_TZ)
+    datetime_now = beijing_now.strftime("%Y-%m-%d %H:%M:%S")
 
     if hmac.compare_digest(request.headers["X-Signature-256"], signature):
         # logger.info(request.data)
