@@ -5,6 +5,7 @@ services:
     command: python main.py
     ports:  
       - "8050:8050"
+    restart: always
     volumes:
       - .:/app
     container_name: cvat_webhook_flask
