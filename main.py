@@ -9,7 +9,7 @@ from config import config
 from loguru import logger
 
 app = Flask(__name__)
-
+logger.add("logs/cvat-webhook.log", rotation="7 days", retention="14 days") # 7天轮转, 只保留14天内的
 @app.route("/webhook", methods=["POST"])
 def webhook():
     signature = (
